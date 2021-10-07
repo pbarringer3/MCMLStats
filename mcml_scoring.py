@@ -13,7 +13,6 @@ def main():
     root.title('MCML Stats')
     primary_frame = MCML_Frame(root, create_meet_file, analyze_meet_file)
     primary_frame.mainloop()
-    # print(calculate_scores("TestData.csv"))
 
 
 def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -105,17 +104,22 @@ def create_meet_file(directory: str, filename: str,
 
     if path.exists(current_roster_path):
         roster = pd.read_csv(current_roster_path)
+
+    # Otherwise get and update the previous year's roster
     elif path.exists(previous_roster_path):
         roster = pd.read_csv(previous_roster_path)
         roster = update_grades(roster)
         roster.to_csv(f'./{directory}/{roster_filename}', index=False)
+
+    # If neither exist, they need to create a roster first.
     else:
         raise FileNotFoundError("No roster file was found. Please check the "
                                 f"{directory} or {int(directory)-1} "
-                                "directories for a file titled 'roster.csv'")
+                                "directories for a file titled "
+                                f"'{roster_filename}'")
 
+    # Add columns for the categories
     roster[categories] = None
-    print(roster)
 
     # Write the desired contents to the file.
     roster.to_csv(relative_file_path, index=False)
@@ -135,6 +139,3 @@ def analyze_meet_file():
 
 if __name__ == '__main__':
     main()
-
-
-# cat_frame.to_csv('Category Rating.csv', index=False)
