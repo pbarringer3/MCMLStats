@@ -94,7 +94,11 @@ def create_meet_file(directory: str, filename: str,
     # Provide error message in this case.
     relative_file_path = f'./{directory}/{filename}'
     if path.exists(relative_file_path):
-        raise ValueError("This file already exists")
+        raise ValueError(
+            "A file for this meet already exists.\n\nIf you wish to replace "
+            "it, you must delete the existing file manually before creating "
+            "the new one with this program.\n\nYou can find the existing file "
+            f"in the {directory} directory. It will be titled '{filename}'.")
 
     # Get the roster, provide error if one doesn't exist
     roster: DataFrame
@@ -113,10 +117,13 @@ def create_meet_file(directory: str, filename: str,
 
     # If neither exist, they need to create a roster first.
     else:
-        raise FileNotFoundError("No roster file was found. Please check the "
-                                f"{directory} or {int(directory)-1} "
-                                "directories for a file titled "
-                                f"'{roster_filename}'")
+        raise FileNotFoundError(
+            f"No roster file was found.\n\nPlease check the {directory} or "
+            f"{int(directory)-1} directories for a file titled "
+            f"'{roster_filename}'.\n\nIf such a file doesn't exist, it must "
+            "be created manually.\n\nDirections for creating this file can be "
+            "found in the file directions.txt or online at "
+            "https://github.com/pbarringer3/MCMLStats.")
 
     # Add columns for the categories
     roster[categories] = None
