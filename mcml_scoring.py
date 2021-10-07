@@ -1,15 +1,18 @@
 import pandas as pd
 import tkinter as tk
+from os import mkdir, path
 
-from ui_elements import MCML_Stats
+from pandas.core.frame import DataFrame
+
+from ui_elements import MCML_Frame
 
 
 def main():
     # Create GUI
     root = tk.Tk()
     root.title('MCML Stats')
-    stats_frame = MCML_Stats(root)
-    stats_frame.mainloop()
+    primary_frame = MCML_Frame(root, create_meet_file, analyze_meet_file)
+    primary_frame.mainloop()
     # print(calculate_scores("TestData.csv"))
 
 
@@ -34,8 +37,8 @@ def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     FINAL_RATING = "Final Individual Rating"
 
     # Define the columns used for scoring
-    START_COL = 3
-    END_COL = 8
+    START_COL = 4
+    END_COL = 9
 
     # Load the data
     meet_data = pd.read_csv(filename)
@@ -80,6 +83,54 @@ def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     category_data = pd.DataFrame.from_dict(category_dict)
 
     return student_data, category_data
+
+
+def create_meet_file(directory: str, filename: str,
+                     categories: list[str]) -> None:
+    # Check for directory and create if needed.
+    if not path.exists(directory):
+        mkdir(directory)
+
+    # Check for file to prevent it being overwritten.
+    # Provide error message in this case.
+    relative_file_path = f'./{directory}/{filename}'
+    if path.exists(relative_file_path):
+        raise ValueError("This file already exists")
+
+    # Get the roster, provide error if one doesn't exist
+    roster: DataFrame
+    roster_filename = 'roster.csv'
+    current_roster_path = f'./{directory}/{roster_filename}'
+    previous_roster_path = f'./{int(directory)-1}/{roster_filename}'
+
+    if path.exists(current_roster_path):
+        roster = pd.read_csv(current_roster_path)
+    elif path.exists(previous_roster_path):
+        roster = pd.read_csv(previous_roster_path)
+        roster = update_grades(roster)
+        roster.to_csv(f'./{directory}/{roster_filename}', index=False)
+    else:
+        raise FileNotFoundError("No roster file was found. Please check the "
+                                f"{directory} or {int(directory)-1} "
+                                "directories for a file titled 'roster.csv'")
+
+    roster[categories] = None
+    print(roster)
+
+    # Write the desired contents to the file.
+    roster.to_csv(relative_file_path, index=False)
+
+
+def update_grades(roster: pd.DataFrame) -> pd.DataFrame:
+    """ This function removes all the seniors from the roster
+    DataFrame and adds a year to all the remaining students' grades."""
+    roster = roster[roster['Grade'] != 12]
+    roster['Grade'] = roster['Grade'] + 1
+    return roster
+
+
+def analyze_meet_file():
+    print("analyze")
 
 
 if __name__ == '__main__':
