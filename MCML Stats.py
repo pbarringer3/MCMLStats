@@ -255,7 +255,7 @@ class Shared_Options(tk.Frame):
                                    font=font, width=20)
         self.year_entry.pack(**inner_packing_args)
 
-        self.choices = ['1', '2', '3', '4', '5', 'All-Star']
+        self.choices = ['1', '2', '3', '4', '5']
         self.meet_entry = ttk.Combobox(row_1, values=self.choices,
                                        font=font, width=18)
         print(self.meet_entry.get())

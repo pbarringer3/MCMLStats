@@ -85,7 +85,7 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
     students' grades, creating a new roster file for this year. If the previous
     year also doesn't have a roster, a FileNotFoundError is raised. """
     directory = year
-    filename = get_filename_from_meet(meet)
+    filename = f'Meet {meet}.csv'
 
     # Check for directory and create if needed.
     if not os.path.exists(directory):
@@ -137,7 +137,7 @@ def create_reports(year: str, meet: str) -> None:
     """ This function triggers the analasys of the provided file and the
     creation of all the files and reports needed for the given meet. """
     directory = year
-    filename = get_filename_from_meet(meet)
+    filename = f'Meet {meet}.csv'
 
     scores_path = f'./{directory}/{filename}'
     # Check directory and file existence
@@ -195,18 +195,10 @@ def generate_reports():
     pass
 
 
-def get_filename_from_meet(meet: str) -> str:
-    """ meet should be either a number or 'All-Star'. This function returns
-    the filename associated with the provided meet. """
-    if meet.isdigit():
-        meet = f'Meet {meet}.csv'
-    else:
-        meet = f'{meet} Meet.csv'
-
-    return meet
-
-
 def update_annual_ratings(student_data: pd.DataFrame, meet: str) -> None:
+    """ Creates a file comprised of each student with their ratings for each
+    meet along with columns for their average rating and averages with dropped
+    meet(s)."""
     pass
 
 
