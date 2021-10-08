@@ -2,5 +2,6 @@
 
 *.csv
 *.pyc
+*.pdf
 scrap.py
 settings.json
