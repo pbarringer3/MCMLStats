@@ -120,7 +120,19 @@ class Analyze_Frame(tk.Frame):
         year = self.shared.get_year()
         meet = self.shared.get_meet()
 
-        data_functions.create_reports(year, meet)
+        try:
+            data_functions.create_reports(year, meet)
+
+        except FileNotFoundError as err:
+            message = err.args[0]
+            self.master.show_error_message(message)
+
+        else:
+            messagebox.showinfo(
+                title="Success!",
+                message=("All reports and data files were created "
+                         "successfully."))
+            self.master.show_menu()
 
 
 class Options_Frame(tk.Frame):
