@@ -1,30 +1,13 @@
 import pandas as pd
-import tkinter as tk
 from os import mkdir, path
-
 from pandas.core.frame import DataFrame
-
-from ui_elements import MCML_Frame
-
-
-def main():
-    # Create GUI
-    root = tk.Tk()
-    root.title('MCML Stats')
-    primary_frame = MCML_Frame(root, create_meet_file, analyze_meet_file)
-    primary_frame.mainloop()
 
 
 def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    ''' Reads in the csv file provided and returns two DataFrames, first, one
+    """ Reads in the csv file provided and returns two DataFrames, first, one
     corresponding to the provided file with an additional column representing
     the students' ratings for the given meet, second, one with the category
-    stats.
-
-    filename should be a string ending in .csv
-    '''
-    if filename[-4:] != '.csv':
-        raise ValueError("The provided file name must end in '.csv'.")
+    stats. """
 
     # Define string constants
     TOTAL = "Total Points"
@@ -84,8 +67,26 @@ def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     return student_data, category_data
 
 
-def create_meet_file(directory: str, filename: str,
-                     categories: list[str]) -> None:
+def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
+    """ Looks for an existing roster and creates a csv file for the given meet
+    based on this roster and the categories provided. The file can then be
+    edited in any spreadsheet editor. All the columns for scores will be blank.
+    The columns for last name, first name, grade, and school will be retained
+    from the roster file.
+
+    If the directory doesn't exist yet for the year, this function creates it.
+
+    Safeguards against accidentally overwriting existing data by seeing if the
+    file already exists. If it does, the function raises a FileExistsError.
+    If the user wants a new file, they must manually delete the old file first.
+
+    The existing roster is a requirement. If there isn't one in the current
+    year, this function will look to the previous year and update all the
+    students' grades, creating a new roster file for this year. If the previous
+    year also doesn't have a roster, a FileNotFoundError is raised. """
+    directory = year
+    filename = get_filename_from_meet(meet)
+
     # Check for directory and create if needed.
     if not path.exists(directory):
         mkdir(directory)
@@ -94,7 +95,7 @@ def create_meet_file(directory: str, filename: str,
     # Provide error message in this case.
     relative_file_path = f'./{directory}/{filename}'
     if path.exists(relative_file_path):
-        raise ValueError(
+        raise FileExistsError(
             "A file for this meet already exists.\n\nIf you wish to replace "
             "it, you must delete the existing file manually before creating "
             "the new one with this program.\n\nYou can find the existing file "
@@ -132,17 +133,36 @@ def create_meet_file(directory: str, filename: str,
     roster.to_csv(relative_file_path, index=False)
 
 
+def create_reports(year: str, meet: str) -> None:
+    """ This function triggers the analasys of the provided file and the
+    creation of all the files and reports needed for the given meet. """
+
+    # Check directory existence
+    # Check file existence
+    # Analyze file
+    # Create csv file with student scores and ratings
+    # Create csv file with category ratings
+    # Create csv file with just roster and ratings for the year
+    # Generate all pdf reports
+    # Create backup of old roster file
+    # Create updated roster file based on this meet's students
+    pass
+
+
+def get_filename_from_meet(meet: str) -> str:
+    """ meet should be either a number or 'All-Star'. This function returns
+    the filename associated with the provided meet. """
+    if meet.isdigit():
+        meet = f'Meet {meet}.csv'
+    else:
+        meet = f'{meet} Meet.csv'
+
+    return meet
+
+
 def update_grades(roster: pd.DataFrame) -> pd.DataFrame:
     """ This function removes all the seniors from the roster
     DataFrame and adds a year to all the remaining students' grades."""
     roster = roster[roster['Grade'] != 12]
     roster['Grade'] = roster['Grade'] + 1
     return roster
-
-
-def analyze_meet_file():
-    print("analyze")
-
-
-if __name__ == '__main__':
-    main()

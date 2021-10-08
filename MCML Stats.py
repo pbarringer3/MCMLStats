@@ -3,6 +3,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
+import data_functions
+
+
 row_packing_args = {
     "side": tk.TOP,
     "fill": tk.X,
@@ -24,12 +27,9 @@ class MCML_Frame(tk.Frame):
     ''' Top level GUI for the MCML statisticians to work on the
     current meet's stats. '''
 
-    def __init__(self, master, create_function, analyze_function):
+    def __init__(self, master):
         tk.Frame.__init__(self, master, width=600)
         self.pack()
-
-        self.create_function = create_function
-        self.analyze_function = analyze_function
 
         # Menu
         self.menu = Menu_Frame(self)
@@ -102,8 +102,8 @@ class Analyze_Frame(tk.Frame):
             for row in csv_reader:
                 self.categories[row[0]] = row[1:]
 
-        shared = Shared_Options(self)
-        shared.pack()
+        self.shared = Shared_Options(self)
+        self.shared.pack()
 
         # Row 2
         row_2 = tk.Frame(self)
@@ -117,7 +117,10 @@ class Analyze_Frame(tk.Frame):
         row_3.pack(**row_packing_args)
 
     def analyze(self):
-        pass
+        year = self.shared.get_year()
+        meet = self.shared.get_meet()
+
+        data_functions.create_reports(year, meet)
 
 
 class Options_Frame(tk.Frame):
@@ -176,23 +179,21 @@ class Options_Frame(tk.Frame):
         year = self.shared.get_year()
         meet = self.shared.get_meet()
 
-        if meet.isdigit():
-            meet = f'Meet {meet}.csv'
-        else:
-            meet = f'{meet} Meet.csv'
-
         categories = [self.row_2.children[key].get()
                       for key in self.row_2.children
                       if 'entry' in key]
 
         try:
-            self.master.create_function(year, meet, categories)
-        except ValueError as err:
+            data_functions.create_meet_file(year, meet, categories)
+
+        except FileExistsError as err:
             message = err.args[0]
             self.master.show_error_message(message)
+
         except FileNotFoundError as err:
             message = err.args[0]
             self.master.show_error_message(message)
+
         else:
             messagebox.showinfo(
                 title="Success!",
@@ -253,3 +254,15 @@ class Shared_Options(tk.Frame):
 
     def get_meet(self):
         return self.meet_entry.get()
+
+
+def main():
+    # Create GUI
+    root = tk.Tk()
+    root.title('MCML Stats')
+    primary_frame = MCML_Frame(root)
+    primary_frame.mainloop()
+
+
+if __name__ == '__main__':
+    main()
