@@ -151,15 +151,21 @@ def create_reports(year: str, meet: str) -> None:
             "the file 'README.md' which can be opened with any text editor "
             "or online at https://github.com/pbarringer3/MCMLStats.")
 
+    # Create subdirectory for reports and data files.
+    subdirectory = f'./{directory}/Meet {meet}'
+    prefix = f'{subdirectory}/Meet {meet}'
+    if not os.path.exists(subdirectory):
+        os.mkdir(subdirectory)
+
     # Analyze file
     student_data, category_data = calculate_stats(scores_path)
 
     # Create csv file with student scores and ratings
-    ratings_path = f'{scores_path[:-4]} with Student Ratings.csv'
+    ratings_path = f'{prefix} with Student Ratings.csv'
     student_data.to_csv(ratings_path, index=False)
 
     # Create csv file with category ratings
-    category_path = f'{scores_path[:-4]} Category Ratings.csv'
+    category_path = f'{prefix} Category Ratings.csv'
     category_data.to_csv(category_path, index=False)
 
     # Create csv file with just roster and ratings for the year
@@ -171,7 +177,7 @@ def create_reports(year: str, meet: str) -> None:
     # Create backup of old roster file if it exists
     roster_path = f'./{directory}/roster.csv'
     if os.path.exists(roster_path):
-        new_roster_path = f'{scores_path[:-4]} Roster Backup.csv'
+        new_roster_path = f'{prefix} Roster Backup.csv'
         os.rename(roster_path, new_roster_path)
 
     # Create updated roster file based on this meet's students
