@@ -1,5 +1,5 @@
 import pandas as pd
-from os import mkdir, path
+import os
 from pandas.core.frame import DataFrame
 
 
@@ -88,13 +88,13 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
     filename = get_filename_from_meet(meet)
 
     # Check for directory and create if needed.
-    if not path.exists(directory):
-        mkdir(directory)
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
     # Check for file to prevent it being overwritten.
     # Provide error message in this case.
     relative_file_path = f'./{directory}/{filename}'
-    if path.exists(relative_file_path):
+    if os.path.exists(relative_file_path):
         raise FileExistsError(
             "A file for this meet already exists.\n\nIf you wish to replace "
             "it, you must delete the existing file manually before creating "
@@ -107,11 +107,11 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
     current_roster_path = f'./{directory}/{roster_filename}'
     previous_roster_path = f'./{int(directory)-1}/{roster_filename}'
 
-    if path.exists(current_roster_path):
+    if os.path.exists(current_roster_path):
         roster = pd.read_csv(current_roster_path)
 
     # Otherwise get and update the previous year's roster
-    elif path.exists(previous_roster_path):
+    elif os.path.exists(previous_roster_path):
         roster = pd.read_csv(previous_roster_path)
         roster = update_grades(roster)
         roster.to_csv(f'./{directory}/{roster_filename}', index=False)
@@ -123,8 +123,8 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
             f"{int(directory)-1} directories for a file titled "
             f"'{roster_filename}'.\n\nIf such a file doesn't exist, it must "
             "be created manually.\n\nDirections for creating this file can be "
-            "found in the file directions.txt or online at "
-            "https://github.com/pbarringer3/MCMLStats.")
+            "found in the file 'README.md' which can be opened with any text "
+            "editor or online at https://github.com/pbarringer3/MCMLStats.")
 
     # Add columns for the categories
     roster[categories] = None
@@ -136,16 +136,50 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
 def create_reports(year: str, meet: str) -> None:
     """ This function triggers the analasys of the provided file and the
     creation of all the files and reports needed for the given meet. """
+    directory = year
+    filename = get_filename_from_meet(meet)
 
-    # Check directory existence
-    # Check file existence
+    scores_path = f'./{directory}/{filename}'
+    # Check directory and file existence
+    if not os.path.exists(scores_path):
+        raise FileNotFoundError(
+            "Meet Data Not Found\n\nIn order to calculate the stats for the "
+            "requested meet, the program looks in its own directory for a "
+            f"folder named '{year}' and a file in that folder named "
+            f"'{filename}'.\n\nThe directory structure is fundamental to this "
+            "program's execution and must be followed. You can read more in "
+            "the file 'README.md' which can be opened with any text editor "
+            "or online at https://github.com/pbarringer3/MCMLStats.")
+
     # Analyze file
+    student_data, category_data = calculate_stats(scores_path)
+
     # Create csv file with student scores and ratings
+    ratings_path = f'{scores_path[:-4]} with Student Ratings.csv'
+    student_data.to_csv(ratings_path, index=False)
+
     # Create csv file with category ratings
+    category_path = f'{scores_path[:-4]} Category Ratings.csv'
+    category_data.to_csv(category_path, index=False)
+
     # Create csv file with just roster and ratings for the year
+    update_annual_ratings(student_data, meet)
+
     # Generate all pdf reports
-    # Create backup of old roster file
+    generate_reports()
+
+    # Create backup of old roster file if it exists
+    roster_path = f'./{directory}/roster.csv'
+    if os.path.exists(roster_path):
+        new_roster_path = f'{scores_path[:-4]} Roster Backup.csv'
+        os.rename(roster_path, new_roster_path)
+
     # Create updated roster file based on this meet's students
+    personal_data_categories = ['Last Name', 'First Name', 'Grade', 'School']
+    student_data[personal_data_categories].to_csv(roster_path, index=False)
+
+
+def generate_reports():
     pass
 
 
@@ -158,6 +192,10 @@ def get_filename_from_meet(meet: str) -> str:
         meet = f'{meet} Meet.csv'
 
     return meet
+
+
+def update_annual_ratings(student_data: pd.DataFrame, meet: str) -> None:
+    pass
 
 
 def update_grades(roster: pd.DataFrame) -> pd.DataFrame:
