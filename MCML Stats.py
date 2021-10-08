@@ -214,9 +214,9 @@ class Options_Frame(tk.Frame):
             messagebox.showinfo(
                 title="Success!",
                 message=("The meet file was created successfully.\n\nIt is "
-                         f"called '{meet}' and can be found in the {year} "
-                         "directory.\n\nYou can open and edit it in Excel, "
-                         "Open Office, Google Sheets, or any spreadsheet "
+                         f"called 'Meet {meet}.csv' and can be found in the "
+                         f"{year} directory.\n\nYou can open and edit it in "
+                         "Excel, Open Office, or any spreadsheet "
                          "editor of your choice.\n\nWhen you are done, you "
                          "can use this program to analyze the student scores "
                          "and generate reports."))
@@ -258,7 +258,6 @@ class Shared_Options(tk.Frame):
         self.choices = ['1', '2', '3', '4', '5']
         self.meet_entry = ttk.Combobox(row_1, values=self.choices,
                                        font=font, width=18)
-        print(self.meet_entry.get())
         if self.meet_entry.get() == '':
             self.meet_entry.current(0)
         self.meet_entry.bind("<<ComboboxSelected>>", callback)
@@ -266,10 +265,10 @@ class Shared_Options(tk.Frame):
         row_1.option_add('*TCombobox*Listbox.font', font)
 
     def get_year(self):
-        return self.year_entry.get()
+        return int(self.year_entry.get())
 
     def get_meet(self):
-        return self.meet_entry.get()
+        return int(self.meet_entry.get())
 
 
 def main():

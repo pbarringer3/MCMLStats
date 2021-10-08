@@ -3,20 +3,27 @@ import os
 from pandas.core.frame import DataFrame
 
 
+# Define string constants
+LAST_NAME = "Last Name"
+FIRST_NAME = "First Name"
+GRADE = "Grade"
+SCHOOL = "School"
+TOTAL = "Total Points"
+COUNT = "# of Students"
+RATINGS = "Category Rating"
+RAT_SUM = "Rating Sum"
+RAT_A = "Rating A"
+RAT_B = "Rating B"
+FINAL_RATING = "Final Individual Rating"
+
+KEY = [LAST_NAME, FIRST_NAME, GRADE, SCHOOL]
+
+
 def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     """ Reads in the csv file provided and returns two DataFrames, first, one
     corresponding to the provided file with an additional column representing
     the students' ratings for the given meet, second, one with the category
     stats. """
-
-    # Define string constants
-    TOTAL = "Total Points"
-    COUNT = "# of Students"
-    RATINGS = "Category Rating"
-    RAT_SUM = "Rating Sum"
-    RAT_A = "Rating A"
-    RAT_B = "Rating B"
-    FINAL_RATING = "Final Individual Rating"
 
     # Define the columns used for scoring
     START_COL = 4
@@ -67,7 +74,7 @@ def calculate_stats(filename: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     return student_data, category_data
 
 
-def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
+def create_meet_file(year: int, meet: int, categories: list[str]) -> None:
     """ Looks for an existing roster and creates a csv file for the given meet
     based on this roster and the categories provided. The file can then be
     edited in any spreadsheet editor. All the columns for scores will be blank.
@@ -84,7 +91,7 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
     year, this function will look to the previous year and update all the
     students' grades, creating a new roster file for this year. If the previous
     year also doesn't have a roster, a FileNotFoundError is raised. """
-    directory = year
+    directory = str(year)
     filename = f'Meet {meet}.csv'
 
     # Check for directory and create if needed.
@@ -133,10 +140,10 @@ def create_meet_file(year: str, meet: str, categories: list[str]) -> None:
     roster.to_csv(relative_file_path, index=False)
 
 
-def create_reports(year: str, meet: str) -> None:
+def create_reports(year: int, meet: int) -> None:
     """ This function triggers the analasys of the provided file and the
     creation of all the files and reports needed for the given meet. """
-    directory = year
+    directory = str(year)
     filename = f'Meet {meet}.csv'
 
     scores_path = f'./{directory}/{filename}'
@@ -187,19 +194,21 @@ def create_reports(year: str, meet: str) -> None:
         os.rename(roster_path, new_roster_path)
 
     # Create updated roster file based on this meet's students
-    personal_data_categories = ['Last Name', 'First Name', 'Grade', 'School']
-    student_data[personal_data_categories].to_csv(roster_path, index=False)
+    student_data[KEY].to_csv(roster_path, index=False)
 
 
 def generate_reports():
     pass
 
 
-def update_annual_ratings(student_data: pd.DataFrame, meet: str) -> None:
+def update_annual_ratings(student_data: pd.DataFrame, meet: int) -> None:
     """ Creates a file comprised of each student with their ratings for each
     meet along with columns for their average rating and averages with dropped
     meet(s)."""
-    pass
+    personal_with_rating = KEY + [FINAL_RATING]
+    if meet == 1:
+        student_data[personal_with_rating].to_csv(
+            f'Cumulative Ratings - Meet {meet}.csv')
 
 
 def update_grades(roster: pd.DataFrame) -> pd.DataFrame:
@@ -208,3 +217,7 @@ def update_grades(roster: pd.DataFrame) -> pd.DataFrame:
     roster = roster[roster['Grade'] != 12]
     roster['Grade'] = roster['Grade'] + 1
     return roster
+
+
+if __name__ == '__main__':
+    update_annual_ratings(pd.DataFrame(), '1')
