@@ -156,6 +156,12 @@ def create_reports(year: str, meet: str) -> None:
     prefix = f'{subdirectory}/Meet {meet}'
     if not os.path.exists(subdirectory):
         os.mkdir(subdirectory)
+    else:
+        raise FileExistsError(
+            "Existing Folder Error\n\nThis program will create a subfolder in "
+            f"the {directory} folder called 'Meet {meet}' along with all of "
+            "its contents. Please remove or rename the existing folder "
+            f"'Meet {meet}' in the {directory} folder.")
 
     # Analyze file
     student_data, category_data = calculate_stats(scores_path)

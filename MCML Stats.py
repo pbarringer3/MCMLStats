@@ -127,6 +127,10 @@ class Analyze_Frame(tk.Frame):
             message = err.args[0]
             self.master.show_error_message(message)
 
+        except FileExistsError as err:
+            message = err.args[0]
+            self.master.show_error_message(message)
+
         else:
             messagebox.showinfo(
                 title="Success!",
