@@ -1,5 +1,7 @@
+import pandas as pd
 import names
 import random
+import os
 
 
 def generate_fake_roster(file_path: str) -> None:
@@ -17,8 +19,30 @@ def generate_fake_roster(file_path: str) -> None:
 
 
 def generate_test_data(file_path: str) -> None:
-    pass
+    empty_stats = pd.read_csv(file_path)
+    categories = empty_stats.keys()[4:10]
+
+    for row in empty_stats.index:
+        empty_stats.loc[row, categories] = get_random_score()
+
+    os.remove(file_path)
+    empty_stats.to_csv(file_path, index=False)
+
+
+def get_random_score():
+    indices = [x for x in range(6)]
+    scores = [None for _ in indices]
+
+    if random.random() > .9:
+        return scores
+
+    sample = random.sample(indices, 3)
+    for index in sample:
+        scores[index] = random.randrange(0, 7)
+
+    return scores
 
 
 if __name__ == "__main__":
-    pass
+    # generate_fake_roster('./2021/roster.csv')
+    generate_test_data('./2021/Meet 2.csv')
