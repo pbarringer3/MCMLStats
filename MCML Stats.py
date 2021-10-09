@@ -150,7 +150,7 @@ class Options_Frame(tk.Frame):
         with open('Default Categories.csv', 'r') as infile:
             csv_reader = reader(infile)
             for row in csv_reader:
-                self.categories[row[0]] = row[1:]
+                self.categories[int(row[0])] = row[1:]
 
         self.shared = Shared_Options(self, callback=self.selection_changed)
         self.shared.pack()
@@ -159,7 +159,7 @@ class Options_Frame(tk.Frame):
         self.row_2 = tk.Frame(self)
         self.row_2.pack(**row_packing_args)
         # set the default selection for the meet
-        self.set_selection('1')
+        self.set_selection(1)
 
         # Row 3
         row_3 = tk.Frame(self)
@@ -173,7 +173,7 @@ class Options_Frame(tk.Frame):
         row_4.pack(**row_packing_args)
 
     def selection_changed(self, _):
-        self.set_selection(self.meet_entry.get())
+        self.set_selection(self.shared.get_meet())
 
     def set_selection(self, meet):
         children = self.row_2.winfo_children()

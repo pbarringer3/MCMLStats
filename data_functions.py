@@ -182,7 +182,7 @@ def create_reports(year: int, meet: int) -> None:
     category_data.to_csv(category_path, index=False)
 
     # Create csv file with just roster and ratings for the year
-    update_annual_ratings(student_data, meet)
+    update_annual_ratings(student_data, year, meet)
 
     # Generate all pdf reports
     generate_reports()
@@ -201,14 +201,41 @@ def generate_reports():
     pass
 
 
-def update_annual_ratings(student_data: pd.DataFrame, meet: int) -> None:
+def update_annual_ratings(student_data: pd.DataFrame, year: int,
+                          meet: int) -> None:
     """ Creates a file comprised of each student with their ratings for each
     meet along with columns for their average rating and averages with dropped
     meet(s)."""
     personal_with_rating = KEY + [FINAL_RATING]
+    prefix = f'./{year}/Cumulative Ratings - Meet'
+    out_path = f'{prefix} {meet}.csv'
+    renamed = {FINAL_RATING: f'Meet {meet} Rating'}
+    data_out = student_data[personal_with_rating].rename(columns=renamed)
+
+    # If Meet 1, just create with personal info and this meet rating
     if meet == 1:
-        student_data[personal_with_rating].to_csv(
-            f'Cumulative Ratings - Meet {meet}.csv')
+        data_out.to_csv(out_path, index=False)
+        return
+
+    # Check for previous ratings file existence.
+    previous_path = f'{prefix} {meet-1}.csv'
+    if not os.path.exists(previous_path):
+        raise FileNotFoundError(
+            "Cumulative Ratings File Error\n\nThe cumulative ratings file from"
+            f" Meet {meet-1} wasn't found in the {year} folder. You should be "
+            "able to recover from this error by rerunning the stats for any "
+            "meets that are missing their cumulative data files.\n\nRemember, "
+            "No statistics files in this folder or any subfolders should be "
+            "deleted. They are very small files and aren't taking up an "
+            "appreciable amount of hard drive space.\n\nIf you can't figure "
+            "out how to recover from this error, contact the program designer "
+            "at patrick.barringer@gmail.com"
+        )
+
+    # Open previous ratings, merge with current ratings, and save to csv
+    previous_ratings = pd.read_csv(previous_path)
+    merged = pd.merge(previous_ratings, data_out, on=KEY, how='outer')
+    merged.to_csv(out_path, index=False)
 
 
 def update_grades(roster: pd.DataFrame) -> pd.DataFrame:
